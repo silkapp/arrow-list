@@ -1,0 +1,26 @@
+Name:             arrow-list
+Version:          0.0.1
+Description:      List arrows.
+Synopsis:         List arrows.
+Category:         Control
+License:          BSD3
+License-file:     LICENSE
+Author:           Sebastiaan Visser
+Maintainer:       haskell@fvisser.nl
+Build-Type:       Simple
+Cabal-Version:    >= 1.2
+
+Library
+  GHC-Options:      -threaded -Wall -O
+  HS-Source-Dirs:   src
+
+  Build-Depends:    base ==4.*,
+                    monads-fd,
+                    transformers
+
+  Exposed-modules:  Control.Arrow.ArrowKleisli
+                    Control.Arrow.ArrowList
+                    Control.Arrow.Functor
+                    Control.Arrow.Instances
+                    Control.Arrow.List
+
