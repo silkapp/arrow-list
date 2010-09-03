@@ -119,6 +119,8 @@ when a c = ifA c a id
 -- The /first/ input arrow is used as the conditional, this allow you
 -- to write: @ c \`guards\` a @
 
+infix 8 `guards`
+
 guards :: (ArrowList (~>), ArrowChoice (~>))
        => (a ~> c)  -- ^ When this condition holds,
        -> (a ~> b)  -- ^ then apply this arrow.
