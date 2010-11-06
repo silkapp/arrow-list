@@ -15,6 +15,8 @@ import Control.Category
 import Control.Monad.Identity
 import Control.Monad.List
 
+-- * ListT arrow.
+
 newtype ListTArrow m a b = ListTArrow { runListTArrow' :: Kleisli (ListT m) a b }
   deriving
     ( Category
@@ -31,6 +33,8 @@ instance Monad m => ArrowKleisli m (ListTArrow m) where
 runListTArrow :: ListTArrow m a b -> a -> m [b]
 runListTArrow a = runListT . runKleisli (runListTArrow' a)
 
+-- * List arrow.
+
 type ListArrow a b = ListTArrow Identity a b
 
 runListArrow :: ListArrow a b -> a -> [b]
@@ -40,6 +44,8 @@ instance Monad m => ArrowList (ListTArrow m) where
   arrL a   = ListTArrow (Kleisli (ListT . return . a))
   mapL f g = arrML (liftM f . runListTArrow g)
 
+-- * Embed a monadic function returning lists.
+
 arrML :: (ArrowList (~>), ArrowKleisli m (~>)) => (a -> m [b]) -> a ~> b
-arrML x = unlistA . arrM x
+arrML x = unlist . arrM x
 

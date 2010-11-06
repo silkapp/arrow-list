@@ -1,6 +1,8 @@
 {-# LANGUAGE TypeOperators, Arrows #-}
 {- |
 The `ArrowList' type class, and a collection of list arrow related functions.
+This typeclass can be used to embed functions producing multiple outputs into a
+an arrow.
 -}
 module Control.Arrow.ArrowList
 (
@@ -8,14 +10,13 @@ module Control.Arrow.ArrowList
   ArrowList (..)
 
   -- * Creating list arrows.
-, unlistA
-, listA
+, unlist
+, unite
 , none
 , concatA
-, maybeL
 
   -- * Collecting the results.
-, collect
+, list
 , empty
 
   -- * Conditional and filter arrows.
@@ -28,6 +29,7 @@ module Control.Arrow.ArrowList
 , orElse
 
   -- * Optionality.
+, maybeL
 , optional
 )
 where
@@ -49,14 +51,14 @@ class Arrow (~>) => ArrowList (~>) where
 
 -- | Create a list arrow of an input list.
 
-unlistA :: ArrowList (~>) => [b] ~> b
-unlistA = arrL id
+unlist :: ArrowList (~>) => [b] ~> b
+unlist = arrL id
 
 -- | Take the output of an arrow producing two results and concatenate them
 -- into the result of the list arrow.
 
-listA :: ArrowList (~>) => (a ~> (b, b)) -> a ~> b
-listA = mapL (concatMap (\(a, b) -> [a, b]))
+unite :: ArrowList (~>) => (a ~> (b, b)) -> a ~> b
+unite = mapL (concatMap (\(a, b) -> [a, b]))
 
 -- | Ignore the input and produce no results. Like `zeroArrow'.
 
@@ -68,17 +70,11 @@ none = arrL (const [])
 concatA :: ArrowPlus (~>) => [a ~> b] -> a ~> b
 concatA = foldr (<+>) zeroArrow
 
--- | Map a `Maybe' input to a list output. When the Maybe is a `Nothing' an
--- empty list will be returned, `Just' will result in a singleton list.
-
-maybeL :: ArrowList (~>) => Maybe a ~> a
-maybeL = arrL (maybe [] return)
-
 -- | Collect the entire results of an list arrow as a singleton value in the
 -- result list.
 
-collect :: ArrowList (~>) => (a ~> b) -> a ~> [b]
-collect = mapL return
+list :: ArrowList (~>) => (a ~> b) -> a ~> [b]
+list = mapL return
 
 -- | Returns a `Bool' indicating whether the input arrow produce any results.
 
@@ -127,20 +123,34 @@ guards :: (ArrowList (~>), ArrowChoice (~>))
        -> a ~> b
 guards c a = ifA c a none
 
-
-
+-- | Filter the results of an arrow with a predicate arrow, when the filter
+-- condition produces results the input is accepted otherwise it is excluded.
 
 filterA :: (ArrowChoice (~>), ArrowList (~>)) => (a ~> c) -> a ~> a
 filterA c = ifA c id none
 
-notA :: (ArrowList (~>), ArrowChoice (~>)) => (a ~> b) -> a ~> a
+-- | Negation list arrow. Only accept the input when the condition produces no
+-- output.
+
+notA :: (ArrowList (~>), ArrowChoice (~>)) => (a ~> c) -> a ~> a
 notA c = ifA c none id
 
-
-
+-- | Apply the input arrow, when the arrow does not produces any results the
+-- second fallback arrow is applied.
+-- Likely written infix like this @ a \`orElse\` b @
 
 orElse :: (ArrowList (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> b) -> a ~> b
-orElse a = ifA a a
+orElse a = ifA a a 
+
+-- | Map a `Maybe' input to a list output. When the Maybe is a `Nothing' an
+-- empty list will be returned, `Just' will result in a singleton list.
+
+maybeL :: ArrowList (~>) => Maybe a ~> a
+maybeL = arrL (maybe [] return)
+
+-- | Apply a list arrow, when there are no results a `Nothing' will be
+-- returned, otherwise the results will be wrapped in a `Just'. This function
+-- always produces result.
 
 optional :: (ArrowChoice (~>), ArrowList (~>)) => (a ~> b) -> a ~> Maybe b
 optional a = ifA a (arr Just . a) (arr (const Nothing))

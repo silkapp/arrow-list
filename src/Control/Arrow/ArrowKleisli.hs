@@ -1,7 +1,11 @@
+{- |
+The `ArrowKleisli' typeclass allows for embedding monadic function in Kleisli
+arrows.
+-}
+
 {-# LANGUAGE
     TypeOperators
   , MultiParamTypeClasses
-  , FlexibleContexts
   , FlexibleInstances
   #-}
 module Control.Arrow.ArrowKleisli where
