@@ -8,10 +8,10 @@ License-file:     LICENSE
 Author:           Sebastiaan Visser
 Maintainer:       haskell@fvisser.nl
 Build-Type:       Simple
-Cabal-Version:    >= 1.2
+Cabal-Version:    >= 1.6
 
 Library
-  GHC-Options:      -threaded -Wall -O
+  GHC-Options:      -Wall
   HS-Source-Dirs:   src
 
   Build-Depends:    base ==4.*,
