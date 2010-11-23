@@ -21,7 +21,7 @@ Library
   HS-Source-Dirs:   src
 
   Build-Depends:    base ==4.*,
-                    mtl ==2.0.*
+                    mtl >= 1.1 && < 2.1
 
   Exposed-modules:  Control.Arrow.ArrowKleisli
                     Control.Arrow.ArrowList
