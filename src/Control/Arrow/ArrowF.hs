@@ -76,7 +76,7 @@ none = constF empty
 -- | Returns a `Bool' indicating whether the input arrow produces a container
 -- with any results.
 
-results :: (Eq (f ()), ArrowF f (~>)) => (a ~> b) -> (a ~> Bool)
+results :: ArrowF f (~>) => (a ~> b) -> (a ~> Bool)
 results a = arr ((/= empty) . fmap (const ())) . unF a
 
 -- | Create a filtering container arrow by mapping a predicate function over the
