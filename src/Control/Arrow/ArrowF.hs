@@ -51,7 +51,7 @@ class (Eq (f ()), Alternative f, Arrow (~>)) => ArrowF f (~>) | (~>) -> f where
 -- into the result of the container arrow.
 
 unite :: ArrowPlus (~>) => (b, b) ~> b
-unite = (arr fst <+> arr snd)
+unite = arr fst <+> arr snd
 
 -- | Skip the input and produce a constant output.
 
