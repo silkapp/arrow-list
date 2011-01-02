@@ -71,7 +71,7 @@ constF = arrF . const
 -- | Ignore the input and produce no results. Like `zeroArrow'.
 
 none :: ArrowF f (~>) => a ~> b
-none = arrF (const empty)
+none = constF empty
 
 -- | Returns a `Bool' indicating whether the input arrow produces a container
 -- with any results.
