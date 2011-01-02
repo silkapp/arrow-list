@@ -109,7 +109,7 @@ when a c = ifA c a id
 
 infix 8 `guards`
 
-guards :: (ArrowChoice (~>), ArrowF f (~>)) => (a ~> c) -> (a ~> b) -> (a ~> b)
+guards :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> (a ~> b) -> (a ~> b)
 guards c a = ifA c a none
 
 -- | Filter the results of an arrow with a predicate arrow, when the filter
