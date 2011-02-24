@@ -11,8 +11,9 @@ module Control.Arrow.ArrowF
 
   -- * Generic arrow utilities.
 , unite
-, constA
+, const
 , concatA
+, plus
 
   -- * Container arrow utilities.
 , constF
@@ -37,13 +38,14 @@ where
 import Control.Applicative hiding (optional)
 import Control.Arrow
 import Control.Category
-import Prelude hiding ((.), id)
+import Prelude hiding ((.), id, const)
+import qualified Prelude
 
 -- | A type class for arrows that produce containers of results. The container
 -- arrow can be seen as a generalization for list arrows. Most operations
 -- assume the container type has an 'Applicative' and a 'Alternative' instance.
 
-class (Eq (f ()), Alternative f, Arrow (~>)) => ArrowF f (~>) | (~>) -> f where
+class (Alternative f, Arrow (~>)) => ArrowF f (~>) | (~>) -> f where
   arrF :: (a -> f b) -> a ~> b    -- ^ Use a container as the input for an arrow.
   unF  :: (a ~> b) -> (a ~> f b)  -- ^ Get the result as container.
 
@@ -55,13 +57,16 @@ unite = arr fst <+> arr snd
 
 -- | Skip the input and produce a constant output.
 
-constA :: Arrow (~>) => b -> a ~> b
-constA = arr . const
+const :: Arrow (~>) => b -> a ~> b
+const = arr . Prelude.const
 
 -- | Collect the results of applying multiple arrows to the same input.
 
 concatA :: ArrowPlus (~>) => [a ~> b] -> a ~> b
 concatA = foldr (<+>) zeroArrow
+
+plus :: ArrowF f (~>) => (a ~> t) -> (a ~> t) -> a ~> t
+plus a b = arrF (\(x, y) -> x <|> y) . (unF a &&& unF b)
 
 -- | Skip the input and produce a constant output specified as a container.
 
@@ -76,7 +81,7 @@ none = constF empty
 -- | Returns a `Bool' indicating whether the input arrow produces a container
 -- with any results.
 
-results :: ArrowF f (~>) => (a ~> b) -> (a ~> Bool)
+results :: (Eq (f ()), ArrowF f (~>)) => (a ~> b) -> (a ~> Bool)
 results a = arr ((/= empty) . fmap (const ())) . unF a
 
 -- | Create a filtering container arrow by mapping a predicate function over the
@@ -91,7 +96,7 @@ isA f = arrF (\a -> if f a then pure a else empty)
 -- used, when the first arrow produces no results the /else/ arrow will be
 -- used.
 
-ifA :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> t) -> (a ~> t) -> a ~> t
+ifA :: (Eq (f ()), ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> t) -> (a ~> t) -> a ~> t
 ifA c t e = proc i -> do x <- results c -< i; if x then e -< i else t -< i
 
 -- | Apply a container arrow only when a conditional arrow produces any
@@ -99,7 +104,7 @@ ifA c t e = proc i -> do x <- results c -< i; if x then e -< i else t -< i
 -- like the identity/. The /second/ input arrow is used as the conditional,
 -- this allow you to write: @ a \`when\` c @
 
-when :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> a) -> (a ~> c) -> a ~> a
+when :: (Eq (f ()), ArrowF f (~>), ArrowChoice (~>)) => (a ~> a) -> (a ~> c) -> a ~> a
 when a c = ifA c a id
 
 -- | Apply a container arrow only when a conditional arrow produces any
@@ -109,26 +114,26 @@ when a c = ifA c a id
 
 infix 8 `guards`
 
-guards :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> (a ~> b) -> (a ~> b)
+guards :: (Eq (f ()), ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> (a ~> b) -> (a ~> b)
 guards c a = ifA c a none
 
 -- | Filter the results of an arrow with a predicate arrow, when the filter
 -- condition produces results the input is accepted otherwise it is excluded.
 
-filterA :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> a ~> a
+filterA :: (Eq (f ()), ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> a ~> a
 filterA c = ifA c id none
 
 -- | Negation container arrow. Only accept the input when the condition
 -- produces no output.
 
-notA :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> a ~> a
+notA :: (Eq (f ()), ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> a ~> a
 notA c = ifA c none id
 
 -- | Apply the input arrow, when the arrow does not produces any results the
 -- second fallback arrow is applied.
 -- Likely written infix like this @ a \`orElse\` b @
 
-orElse :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> b) -> a ~> b
+orElse :: (Eq (f ()), ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> b) -> a ~> b
 orElse a = ifA a a 
 
 -- | Map a `Maybe' input to a container output. When the Maybe is a `Nothing'
@@ -142,6 +147,6 @@ maybeL = arrF (maybe empty pure)
 -- returned, otherwise the results will be wrapped in a `Just'. This function
 -- always produces result.
 
-optional :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> a ~> Maybe b
+optional :: (Eq (f ()), ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> a ~> Maybe b
 optional a = ifA a (arr Just . a) (arr (const Nothing))
 
