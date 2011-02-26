@@ -1,5 +1,5 @@
 Name:             arrow-list
-Version:          0.3
+Version:          0.3.1
 Synopsis:         List arrows for Haskell.
 Description:      This small Haskell library provides some type class, types
                   and functions to work with list arrows. List arrows represent
@@ -27,4 +27,5 @@ Library
                     Control.Arrow.ArrowList
                     Control.Arrow.ArrowF
                     Control.Arrow.List
+                    Data.List.Ordered
 

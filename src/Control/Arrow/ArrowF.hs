@@ -46,8 +46,8 @@ import qualified Prelude
 -- assume the container type has an 'Applicative' and a 'Alternative' instance.
 
 class (Alternative f, Arrow (~>)) => ArrowF f (~>) | (~>) -> f where
-  arrF :: (a -> f b) -> a ~> b    -- ^ Use a container as the input for an arrow.
-  unF  :: (a ~> b) -> (a ~> f b)  -- ^ Get the result as container.
+  embed   :: f a ~> a              -- ^ Use a container as the input for an arrow.
+  observe :: (a ~> b) -> a ~> f b  -- ^ Get the result as container.
 
 -- | Take the output of an arrow producing two results and concatenate them
 -- into the result of the container arrow.
@@ -65,13 +65,15 @@ const = arr . Prelude.const
 concatA :: ArrowPlus (~>) => [a ~> b] -> a ~> b
 concatA = foldr (<+>) zeroArrow
 
-plus :: ArrowF f (~>) => (a ~> t) -> (a ~> t) -> a ~> t
-plus a b = arrF (\(x, y) -> x <|> y) . (unF a &&& unF b)
+-- | Join the results of two arrows, like (<+>) from ArrowPlus.
+
+plus :: ArrowF f (~>) => (a ~> b) -> (a ~> b) -> a ~> b
+plus a b = embed . arr (\(x, y) -> x <|> y) . (observe a &&& observe b)
 
 -- | Skip the input and produce a constant output specified as a container.
 
-constF :: ArrowF f (~>) => f b -> a ~> b
-constF = arrF . const
+constF :: ArrowF f (~>) => f c -> a ~> c
+constF f = embed . const f
 
 -- | Ignore the input and produce no results. Like `zeroArrow'.
 
@@ -82,14 +84,14 @@ none = constF empty
 -- with any results.
 
 results :: (Eq (f ()), ArrowF f (~>)) => (a ~> b) -> (a ~> Bool)
-results a = arr ((/= empty) . fmap (const ())) . unF a
+results a = arr ((/= empty) . fmap (const ())) . observe a
 
 -- | Create a filtering container arrow by mapping a predicate function over the
 -- input. When the predicate returns `True' the input will be returned in the
 -- output container, when `False' the empty container is returned.
 
 isA :: ArrowF f (~>) => (a -> Bool) -> a ~> a
-isA f = arrF (\a -> if f a then pure a else empty)
+isA f = embed . arr (\a -> if f a then pure a else empty)
 
 -- | Use the result of a container arrow as a conditional, like an if-then-else
 -- arrow. When the first arrow produces any results the /then/ arrow will be
@@ -141,7 +143,7 @@ orElse a = ifA a a
 -- container.
 
 maybeL :: ArrowF f (~>) => Maybe a ~> a
-maybeL = arrF (maybe empty pure)
+maybeL = embed . arr (maybe empty pure)
 
 -- | Apply a container arrow, when there are no results a `Nothing' will be
 -- returned, otherwise the results will be wrapped in a `Just'. This function
