@@ -17,6 +17,8 @@ module Data.List.Ordered
 , fromAscList
 , fromDescList
 , fromAscOrDescList
+, fromMap
+, fromMapRange
 
 -- * Observing as regular Haskell list.
 , toList
@@ -29,6 +31,7 @@ module Data.List.Ordered
 -- * Internally used helper functions.
 , mergeBy
 , localNubBy
+, mapRange
 )
 where
 
@@ -37,6 +40,7 @@ import Control.Monad.Identity
 import Data.List
 import Data.Ord
 import qualified Control.Applicative
+import qualified Data.Map as M
 
 -------------------------------------------------------------------------------
 
@@ -48,6 +52,7 @@ data List a =
 
 -- | A sorting direction, either ascending or descending.
 data Direction = Asc | Desc
+  deriving (Eq, Ord, Show)
 
 -------------------------------------------------------------------------------
 
@@ -69,6 +74,11 @@ add x = Merge (FromAsc [x])
 merge :: List a -> List a -> List a
 merge = Merge
 
+-- | /O(1)/ Create an ordered list form a Haskell list. No assumption is made
+-- about the order of the items of the input list, it will be sorted before it
+-- is converted. When you know in advance the input list is in a certain order
+-- use the 'fromAscList' or 'fromDescList'.
+
 fromList :: Ord a => [a] -> List a
 fromList xs = FromAscOrDesc
   (sort xs)
@@ -82,6 +92,12 @@ fromDescList xs = FromDesc xs
 
 fromAscOrDescList :: [a] -> [a] -> List a
 fromAscOrDescList = FromAscOrDesc
+
+fromMap :: M.Map k a -> List a
+fromMap m = FromAscOrDesc (map snd (M.toAscList m)) (map snd (M.toDescList m))
+
+fromMapRange :: Ord k => Maybe k -> Maybe k -> M.Map k a -> List a
+fromMapRange a b = fromMap . mapRange a b
 
 mergeMap :: (a -> List b) -> List a -> List b
 mergeMap f = foldl1 merge . map f . toUnorderedList
@@ -131,6 +147,18 @@ localNubBy f = n
                    | otherwise = x : n (y:xs)
         n xs                   = xs
 
+mapRange :: Ord k => Maybe k -> Maybe k -> M.Map k v -> M.Map k v
+mapRange from to m0 =
+  let (e0, m1) = case from of Nothing -> (Nothing, m0)
+                              Just f  -> let (_, m, o) = M.splitLookup f m0 in (m, o)
+      (e1, m2) = case to   of Nothing -> (Nothing, m1)
+                              Just f  -> let (o, m, _) = M.splitLookup f m1 in (m, o)
+  in case (M.insert <$> from <*> e0, M.insert <$> to <*> e1) of
+       (Just f, Just g) -> f (g m2)
+       (Just f, _     ) -> f m2
+       (_     , Just g) -> g m2
+       (_     , _     ) -> m2
+
 -------------------------------------------------------------------------------
 
 newtype ListT m a = ListT { runListT :: m (List a) }
@@ -175,19 +203,4 @@ instance Applicative List where
 instance Alternative List where
   empty = mzero
   (<|>) = mplus
-
--------------------------------------------------------------------------------
-
-{-
-myExampleList :: List Integer
-myExampleList = fromAscOrDescList [10, 20, 30] [30, 20, 10]
-        `merge` fromAscList       [4, 50, 600]
-        `merge` fromAscList       [3, 41, 501]
-        `merge` fromDescList      [300, 200, 100, 50, 25, 10, 5, 2, 1]
-        `merge` fromAscList       [3, 40, 500]
-        `merge` fromDescList      [3000, 2000, 1000, 500, 250, 100, 50, 20, 10]
-
-testerdetest :: [Integer]
-testerdetest = toAscList (myExampleList >>= (\a -> singleton a `merge` singleton (a * 100)))
--}
 

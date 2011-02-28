@@ -20,12 +20,14 @@ Library
   GHC-Options:      -Wall
   HS-Source-Dirs:   src
 
-  Build-Depends:    base ==4.*,
-                    mtl >= 1.1 && < 2.1
+  Build-Depends:    base ==4.*
+                  , mtl >= 1.1 && < 2.1
+                  , containers ==0.3.*
 
-  Exposed-modules:  Control.Arrow.ArrowKleisli
+  Exposed-modules:  Control.Arrow.ArrowF
+                    Control.Arrow.ArrowKleisli
                     Control.Arrow.ArrowList
-                    Control.Arrow.ArrowF
+                    Control.Arrow.List.Ordered
                     Control.Arrow.List
                     Data.List.Ordered
 

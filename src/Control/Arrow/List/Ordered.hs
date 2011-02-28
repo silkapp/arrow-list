@@ -43,8 +43,7 @@ runListArrow a = runIdentity . runListTArrow a
 instance Monad m => ArrowF List (ListTArrow m) where
   embed     = ListTArrow (Kleisli (ListT . return))
   observe f = ListTArrow . Kleisli $ \a -> ListT $
-                do l <- runListT (runKleisli (runListTArrow' f) a)
-                   return (singleton l)
+                singleton `liftM` runListT (runKleisli (runListTArrow' f) a)
 
 -- * Embed a monadic function returning an ordered list into a container arrow.
 
