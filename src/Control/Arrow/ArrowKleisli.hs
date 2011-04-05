@@ -1,8 +1,7 @@
 {- |
-The `ArrowKleisli' typeclass allows for embedding monadic function in Kleisli
-arrows.
+The `ArrowKleisli' type class allows for embedding monadic operations in
+Kleisli arrows.
 -}
-
 {-# LANGUAGE
     TypeOperators
   , MultiParamTypeClasses
@@ -11,8 +10,10 @@ arrows.
   #-}
 module Control.Arrow.ArrowKleisli where
 
-import Control.Monad.Trans
 import Control.Arrow
+import Control.Category
+import Control.Monad.Trans
+import Prelude hiding ((.), id, const)
 
 class (Monad m, Arrow (~>)) => ArrowKleisli m (~>) | (~>) -> m where
   arrM :: (a -> m b) -> a ~> b

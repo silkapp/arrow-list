@@ -8,6 +8,7 @@ module Control.Arrow.ArrowF
 (
   -- * Container arrow type class.
   ArrowF (..)
+, arrML
 
   -- * Generic arrow utilities.
 , unite
@@ -37,6 +38,7 @@ where
 
 import Control.Applicative hiding (optional)
 import Control.Arrow
+import Control.Arrow.ArrowKleisli
 import Control.Category
 import Data.Foldable (Foldable, toList)
 import Prelude hiding ((.), id, const)
@@ -50,6 +52,11 @@ import qualified Prelude
 class (Foldable f, Alternative f, Arrow (~>)) => ArrowF f (~>) | (~>) -> f where
   embed   :: f a ~> a              -- ^ Use a container as the input for an arrow.
   observe :: (a ~> b) -> a ~> f b  -- ^ Get the result as container.
+
+-- | Embed a monadic function returning an ordered list into a container arrow.
+
+arrML :: (ArrowF f (~>), ArrowKleisli m (~>)) => (a -> m (f c)) -> a ~> c
+arrML x = embed . arrM x
 
 -- | Take the output of an arrow producing two results and concatenate them
 -- into the result of the container arrow.

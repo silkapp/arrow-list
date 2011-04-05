@@ -7,7 +7,7 @@
   #-}
 module Control.Arrow.List.Ordered where
 
-import Prelude hiding ((.), id)
+import Prelude hiding ((.), id, const)
 import Control.Arrow
 import Control.Arrow.ArrowKleisli
 import Control.Arrow.ArrowF
@@ -44,9 +44,4 @@ instance Monad m => ArrowF List (ListTArrow m) where
   embed     = ListTArrow (Kleisli (ListT . return))
   observe f = ListTArrow . Kleisli $ \a -> ListT $
                 singleton `liftM` runListT (runKleisli (runListTArrow' f) a)
-
--- * Embed a monadic function returning an ordered list into a container arrow.
-
-arrML :: (ArrowF f (~>), ArrowKleisli m (~>)) => (a -> m (f c)) -> a ~> c
-arrML x = embed . arrM x
 
