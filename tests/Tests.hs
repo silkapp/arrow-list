@@ -2,17 +2,22 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Main where
 
-import Control.Applicative hiding (empty)
+import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Identity
+import Control.Applicative
 import Data.Monoid
 import Data.Maybe
 import Data.List
-import Data.List.Ordered hiding (null, length, take, drop, filter)
+import Data.List.Ordered hiding (null, length, take, drop, filter, empty)
 import Test.QuickCheck
 import System.Random
 import qualified Data.List.Ordered as O
 import qualified Data.Map as M
 import qualified Data.Sequence as S
+import qualified Data.Foldable as F
 
+import System.IO.Unsafe
 import Debug.Trace
 
 newtype Val = Val { unVal :: Int }
@@ -57,7 +62,7 @@ instance (Ord a, Arbitrary a) => Arbitrary (List a) where
 
 -------------------------------------------------------------------------------
 
-check :: List Val -> [Val] -> (List Val -> List Val) -> ([Val] -> [Val]) -> Bool
+check :: (Show a, Ord a) => List a -> [a] -> (List a -> List a) -> ([a] -> [a]) -> Bool
 check a b f g = and
   [                    (f a) == f (fromList              b)
   , toList (Just Asc)  (f a) == g (sort                  b)
@@ -65,10 +70,10 @@ check a b f g = and
   , O.null             (f a) == null                  (g b)
   , O.length           (f a) == length                (g b)
   , show               (f a) == show                  (g (sort b))
-  , sort (toList Nothing a)  == sort b
+  , sort (F.toList a)        == sort b
   ]
 
-observe :: List Val -> [Val] -> Bool
+observe :: (Show a, Ord a) => List a -> [a] -> Bool
 observe a b =
   let n = length b
       h = n `div` 2
@@ -84,7 +89,7 @@ observe a b =
          , check a b (O.take h) (take h)
          , check a b (O.take n) (take n)
          , check a b (O.take m) (take m)
-         , check a b (O.mapMonotonic (*2)) (map (*2))
+--          , check a b (O.mapMonotonic (*2)) (map (*2))
          ]
 
 fromListT :: [Val] -> Bool
@@ -106,7 +111,7 @@ mergesT :: [[Val]] -> Bool
 mergesT a = observe (merges (map fromList a)) (concat a)
 
 addEmptyT :: [Val] -> Bool
-addEmptyT a = observe (foldr add empty a) a
+addEmptyT a = observe (foldr add O.empty a) a
 
 mappendMemptyT :: [Val] -> Bool
 mappendMemptyT a = observe (foldr mappend mempty (map singleton a)) a
@@ -156,6 +161,33 @@ filterT a =
 mapMonotonicT :: List Val -> Bool
 mapMonotonicT a = filterT (mapMonotonic (+10) a)
 
+bindT :: [Val] -> [Val] -> Bool
+bindT a b = and
+  [ observe olist                               list
+  , observe (unsafePerformIO (runListT olistT)) list
+  ]
+  where olist =
+          do let c = fromList a
+             let d = fromList b
+             x <- (,) <$> c <*> c
+             y <- (*2) `fmap` d
+             z <- empty <|> c <|> d <|> pure 4
+             return (x, y, z)
+        olistT =
+          do let c = ListT (return (fromList a))
+             let d = ListT (return (fromList b))
+             x <- (,) <$> c <*> c
+             y <- (*2) `fmap` d
+             z <- empty <|> c <|> d <|> liftIO (putStr "" >> return 4)
+             pure (x, y, z)
+        list =
+          do let c = a
+             let d = b
+             x <- (,) <$> c <*> c
+             y <- (*2) `fmap` d
+             z <- empty <|> c <|> d <|> pure 4
+             return (x, y, z)
+
 -------------------------------------------------------------------------------
 
 main :: IO ()
@@ -165,7 +197,7 @@ main =
      putStrLn "fromDescListT: ";         quickCheck fromDescListT
      putStrLn "fromAscOrDescListT: ";    quickCheck fromAscOrDescListT
      putStrLn "fromListsT: ";            quickCheck fromListsT
-     putStrLn "mergesT: ";               quickCheck mergesT
+     putStrLn "mergesT: ";               quickCheckWith stdArgs { maxSize = 10 } bindT
      putStrLn "addEmptyT: ";             quickCheck addEmptyT
      putStrLn "mappendMemptyT: ";        quickCheck mappendMemptyT
      putStrLn "fromMapT: ";              quickCheck fromMapT
@@ -173,4 +205,5 @@ main =
      putStrLn "filterT:";                quickCheck filterT
      putStrLn "filterT:";                quickCheck mapMonotonicT
      putStrLn "fromMapRangeT:";          quickCheck fromMapRangeT
+     putStrLn "bindT:";                  quickCheckWith stdArgs { maxSize = 7 } bindT
 
