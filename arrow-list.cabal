@@ -27,7 +27,5 @@ Library
   Exposed-modules:  Control.Arrow.ArrowF
                     Control.Arrow.ArrowKleisli
                     Control.Arrow.ArrowList
-                    Control.Arrow.List.Ordered
                     Control.Arrow.List
-                    Data.List.Ordered
 
