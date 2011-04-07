@@ -108,7 +108,7 @@ isA f = embed . arr (\a -> if f a then pure a else empty)
 -- used.
 
 ifA :: (ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> t) -> (a ~> t) -> a ~> t
-ifA c t e = proc i -> do x <- results c -< i; if x then e -< i else t -< i
+ifA c t e = proc i -> do x <- results c -< i; if x then t -< i else e -< i
 
 -- | Apply a container arrow only when a conditional arrow produces any
 -- results.  When the conditional produces no results the output arrow /behaves
