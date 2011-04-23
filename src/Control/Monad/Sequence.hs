@@ -14,10 +14,11 @@ import Data.Sequence
 import Data.Traversable
 import Prelude hiding (mapM)
 
--- | Parameterizable sequence monad, with an inner monad. The semantics of
+-- | Parameterizable `Sequence' monad, with an inner monad. The semantics of
 -- `SeqT' are comparable to that of `ListT`.
 --
--- /Note:/ this does not yield a monad unless the argument monad is commutative.
+-- /Note:/ Like the ListT monad, this does not yield a monad unless the
+-- argument monad is commutative.
 newtype SeqT m a = SeqT { runSeqT :: m (Seq a) }
 
 mapSeqT :: (m (Seq a) -> n (Seq b)) -> SeqT m a -> SeqT n b
