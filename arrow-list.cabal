@@ -1,12 +1,13 @@
 Name:             arrow-list
-Version:          0.4.2
+Version:          0.5
 Synopsis:         List arrows for Haskell.
 Description:      This small Haskell library provides some type class, types
-                  and functions to work with list arrows. List arrows represent
-                  computations that may return multiple outputs. Making
-                  functions that return lists an instance of both the
-                  `Category` and `Arrow` type class allow you to easily compose
-                  multiple computations into one with standard building blocks.
+                  and functions to work with list (and list-like) arrows. List
+                  arrows represent computations that may return multiple
+                  outputs. Making functions that return lists an instance of
+                  both the `Category` and `Arrow` type class allow you to
+                  easily compose multiple computations into one with standard
+                  building blocks.
 
 Category:         Control
 License:          BSD3
@@ -28,4 +29,6 @@ Library
                     Control.Arrow.ArrowKleisli
                     Control.Arrow.ArrowList
                     Control.Arrow.List
+                    Control.Arrow.Sequence
+                    Control.Monad.Sequence
 
