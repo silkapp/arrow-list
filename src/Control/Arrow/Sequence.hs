@@ -36,10 +36,10 @@ runSeqTArrow a = runSeqT . runKleisli (runSeqTArrow' a)
 
 -- * Seq arrow.
 
-type ListArrow a b = SeqTArrow Identity a b
+type SeqArrow a b = SeqTArrow Identity a b
 
-runListArrow :: ListArrow a b -> a -> Seq b
-runListArrow a = runIdentity . runSeqTArrow a
+runSeqArrow :: SeqArrow a b -> a -> Seq b
+runSeqArrow a = runIdentity . runSeqTArrow a
 
 instance Monad m => ArrowF Seq (SeqTArrow m) where
   embed     = SeqTArrow (Kleisli (SeqT . return))
