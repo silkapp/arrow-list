@@ -1,3 +1,4 @@
+{-# OPTIONS -fno-warn-orphans #-}
 module Control.Monad.Sequence
 (
 -- * The `Sequence' monad transformer.
@@ -13,6 +14,14 @@ import Data.Monoid
 import Data.Sequence
 import Data.Traversable
 import Prelude hiding (mapM)
+
+instance Applicative Seq where
+  pure  = return
+  (<*>) = ap
+
+instance Alternative Seq where
+  empty = mzero
+  (<|>) = mplus
 
 -- | Parameterizable `Sequence' monad, with an inner monad. The semantics of
 -- `SeqT' are comparable to that of `ListT`.
