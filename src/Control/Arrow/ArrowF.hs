@@ -9,7 +9,7 @@ module Control.Arrow.ArrowF
   -- * Container arrow type class.
   ArrowF (..)
 , mapF
-, arrML
+, arrMF
 
   -- * Generic arrow utilities.
 , unite
@@ -32,7 +32,7 @@ module Control.Arrow.ArrowF
 , orElse
 
   -- * Optionality.
-, maybeL
+, maybeA
 , optional
 )
 where
@@ -56,8 +56,8 @@ class Arrow (~>) => ArrowF f (~>) | (~>) -> f where
 
 -- | Embed a monadic function returning an ordered list into a container arrow.
 
-arrML :: (ArrowF f (~>), ArrowKleisli m (~>)) => (a -> m (f c)) -> a ~> c
-arrML x = embed . arrM x
+arrMF :: (ArrowF f (~>), ArrowKleisli m (~>)) => (a -> m (f c)) -> a ~> c
+arrMF x = embed . arrM x
 
 -- | Map a function over the result collection of a container arrow.
 
@@ -157,8 +157,8 @@ orElse a = ifA a a
 -- an empty container will be returned, `Just' will result in a singleton
 -- container.
 
-maybeL :: (Alternative f, ArrowF f (~>)) => Maybe a ~> a
-maybeL = embed . arr (maybe empty pure)
+maybeA :: (Alternative f, ArrowF f (~>)) => Maybe a ~> a
+maybeA = embed . arr (maybe empty pure)
 
 -- | Apply a container arrow, when there are no results a `Nothing' will be
 -- returned, otherwise the results will be wrapped in a `Just'. This function
