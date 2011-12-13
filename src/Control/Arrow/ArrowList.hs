@@ -104,6 +104,8 @@ ifA c t e = proc i -> do x <- empty c -< i; if x then e -< i else t -< i
 -- The /second/ input arrow is used as the conditional, this allow
 -- you to write: @ a \`when\` c @
 
+infix 8 `when`
+
 when :: (ArrowList (~>), ArrowChoice (~>))
      => (a ~> a)  -- ^ The arrow to apply,
      -> (a ~> b)  -- ^ when this conditional holds.
@@ -138,6 +140,8 @@ notA c = ifA c none id
 -- | Apply the input arrow, when the arrow does not produces any results the
 -- second fallback arrow is applied.
 -- Likely written infix like this @ a \`orElse\` b @
+
+infix 8 `orElse`
 
 orElse :: (ArrowList (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> b) -> a ~> b
 orElse a = ifA a a 
