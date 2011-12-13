@@ -11,6 +11,7 @@ import Prelude hiding ((.), id)
 import Control.Arrow
 import Control.Arrow.ArrowKleisli
 import Control.Arrow.ArrowList
+import Control.Arrow.ArrowF
 import Control.Category
 import Control.Monad.Identity
 import Control.Monad.List
@@ -43,6 +44,11 @@ runListArrow a = runIdentity . runListTArrow a
 instance Monad m => ArrowList (ListTArrow m) where
   arrL a   = ListTArrow (Kleisli (ListT . return . a))
   mapL f g = arrML (liftM f . runListTArrow g)
+
+instance Monad m => ArrowF [] (ListTArrow m) where
+  embed     = ListTArrow (Kleisli (ListT . return))
+  observe f = ListTArrow . Kleisli $ \a -> ListT $
+                return `liftM` runListT (runKleisli (runListTArrow' f) a)
 
 -- * Embed a monadic function returning lists.
 
