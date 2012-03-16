@@ -119,7 +119,9 @@ ifA c t e = proc i -> do x <- results c -< i; if x then t -< i else e -< i
 -- | Apply a container arrow only when a conditional arrow produces any
 -- results.  When the conditional produces no results the output arrow /behaves
 -- like the identity/. The /second/ input arrow is used as the conditional,
--- this allow you to write: @ a \`when\` c @
+-- this allow you to write: @ a \`when\` condition @
+
+infix 7 `when`
 
 when :: (Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> a) -> (a ~> c) -> a ~> a
 when a c = ifA c a id
@@ -127,7 +129,7 @@ when a c = ifA c a id
 -- | Apply a container arrow only when a conditional arrow produces any
 -- results.  When the conditional produces no results the output arrow
 -- /produces no results/. The /first/ input arrow is used as the conditional,
--- this allow you to write: @ c \`guards\` a @
+-- this allow you to write: @ condition \`guards\` a @
 
 infix 8 `guards`
 
@@ -149,6 +151,8 @@ notA c = ifA c none id
 -- | Apply the input arrow, when the arrow does not produces any results the
 -- second fallback arrow is applied.
 -- Likely written infix like this @ a \`orElse\` b @
+
+infix 6 `orElse`
 
 orElse :: (Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> b) -> a ~> b
 orElse a = ifA a a 
