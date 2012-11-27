@@ -22,7 +22,7 @@ Library
   HS-Source-Dirs:   src
 
   Build-Depends:    base ==4.*
-                  , mtl >= 1.1 && < 2.1
+                  , mtl >= 1.1 && < 2.2
                   , containers >=0.3 && < 0.5
 
   Exposed-modules:  Control.Arrow.ArrowF
