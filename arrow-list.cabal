@@ -22,16 +22,8 @@ Library
   HS-Source-Dirs:   src
 
   Build-Depends:    base ==4.*
-<<<<<<< HEAD
-                  , mtl >= 1.1 && < 2.1
-                  , containers >=0.3 && < 0.6
-||||||| merged common ancestors
-                  , mtl >= 1.1 && < 2.1
-                  , containers >=0.3 && < 0.5
-=======
                   , mtl >= 1.1 && < 2.2
-                  , containers >=0.3 && < 0.5
->>>>>>> ae452d8
+                  , containers >= 0.3 && < 0.6
 
   Exposed-modules:  Control.Arrow.ArrowF
                     Control.Arrow.ArrowKleisli
