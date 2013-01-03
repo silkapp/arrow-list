@@ -15,18 +15,18 @@ import Control.Category
 import Control.Monad.Trans
 import Prelude hiding ((.), id)
 
-class (Monad m, Arrow (~>)) => ArrowKleisli m (~>) | (~>) -> m where
-  arrM :: (a -> m b) -> a ~> b
+class (Monad m, Arrow arr) => ArrowKleisli m arr | arr -> m where
+  arrM :: (a -> m b) -> a `arr` b
 
 instance Monad m => ArrowKleisli m (Kleisli m) where
   arrM f = Kleisli f
 
-constM :: ArrowKleisli m (~>) => m b -> a ~> b
+constM :: ArrowKleisli m arr => m b -> a `arr` b
 constM a = arrM (const a)
 
-effect :: ArrowKleisli m (~>) => m () -> a ~> a
+effect :: ArrowKleisli m arr => m () -> a `arr` a
 effect a = arrM (\b -> a >> return b)
 
-arrIO :: (MonadIO m, ArrowKleisli m (~>)) => (a -> IO b) -> a ~> b
+arrIO :: (MonadIO m, ArrowKleisli m arr) => (a -> IO b) -> a `arr` b
 arrIO f = arrM (liftIO . f)
 
