@@ -52,6 +52,6 @@ instance Monad m => ArrowF [] (ListTArrow m) where
 
 -- * Embed a monadic function returning lists.
 
-arrML :: (ArrowList (~>), ArrowKleisli m (~>)) => (a -> m [b]) -> a ~> b
+arrML :: (ArrowList ar, ArrowKleisli m ar) => (a -> m [b]) -> a `ar` b
 arrML x = unlist . arrM x
 

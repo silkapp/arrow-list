@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# OPTIONS -fno-warn-orphans #-}
 module Control.Monad.Sequence
 (
@@ -15,6 +16,8 @@ import Data.Sequence
 import Data.Traversable
 import Prelude hiding (mapM)
 
+#if MIN_VERSION_containers(0,5,2)
+#else
 instance Applicative Seq where
   pure  = return
   (<*>) = ap
@@ -22,6 +25,7 @@ instance Applicative Seq where
 instance Alternative Seq where
   empty = mzero
   (<|>) = mplus
+#endif
 
 -- | Parameterizable `Sequence' monad, with an inner monad. The semantics of
 -- `SeqT' are comparable to that of `ListT`.

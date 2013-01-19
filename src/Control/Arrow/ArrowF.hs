@@ -50,62 +50,62 @@ import qualified Prelude
 -- assume the container type has an 'Applicative', an 'Alternative' and a
 -- 'Foldable' instance.
 
-class Arrow (~>) => ArrowF f (~>) | (~>) -> f where
-  embed   :: f a ~> a              -- ^ Use a container as the input for an arrow.
-  observe :: (a ~> b) -> a ~> f b  -- ^ Get the result as container.
+class Arrow ar => ArrowF f ar | ar -> f where
+  embed   :: f a `ar` a                -- ^ Use a container as the input for an arrow.
+  observe :: (a `ar` b) -> a `ar` f b  -- ^ Get the result as container.
 
 -- | Embed a monadic function returning an ordered list into a container arrow.
 
-arrMF :: (ArrowF f (~>), ArrowKleisli m (~>)) => (a -> m (f c)) -> a ~> c
+arrMF :: (ArrowF f ar, ArrowKleisli m ar) => (a -> m (f c)) -> a `ar` c
 arrMF x = embed . arrM x
 
 -- | Map a function over the result collection of a container arrow.
 
-mapF :: ArrowF f (~>) => (f b -> f c) -> a ~> b -> a ~> c
+mapF :: ArrowF f ar => (f b -> f c) -> a `ar` b -> a `ar` c
 mapF f a = embed . arr f . observe a
 
 -- | Take the output of an arrow producing two results and concatenate them
 -- into the result of the container arrow.
 
-unite :: ArrowPlus (~>) => (b, b) ~> b
+unite :: ArrowPlus ar => (b, b) `ar` b
 unite = arr fst <+> arr snd
 
 -- | Skip the input and produce a constant output.
 
-const :: Arrow (~>) => b -> a ~> b
+const :: Arrow ar => b -> a `ar` b
 const = arr . Prelude.const
 
 -- | Collect the results of applying multiple arrows to the same input.
 
-concatA :: ArrowPlus (~>) => [a ~> b] -> a ~> b
+concatA :: ArrowPlus ar => [a `ar` b] -> a `ar` b
 concatA = foldr (<+>) zeroArrow
 
 -- | Join the results of two arrows, like (<+>) from ArrowPlus.
 
-plus :: (Alternative f, ArrowF f (~>)) => (a ~> b) -> (a ~> b) -> a ~> b
+plus :: (Alternative f, ArrowF f ar) => (a `ar` b) -> (a `ar` b) -> a `ar` b
 plus a b = embed . arr (\(x, y) -> x <|> y) . (observe a &&& observe b)
 
 -- | Skip the input and produce a constant output specified as a container.
 
-constF :: ArrowF f (~>) => f c -> a ~> c
+constF :: ArrowF f ar => f c -> a `ar` c
 constF f = embed . const f
 
 -- | Ignore the input and produce no results. Like `zeroArrow'.
 
-none :: (Alternative f, ArrowF f (~>)) => a ~> b
+none :: (Alternative f, ArrowF f ar) => a `ar` b
 none = constF empty
 
 -- | Returns a `Bool' indicating whether the input arrow produces a container
 -- with any results.
 
-results :: (Foldable f, ArrowF f (~>)) => (a ~> b) -> (a ~> Bool)
+results :: (Foldable f, ArrowF f ar) => (a `ar` b) -> (a `ar` Bool)
 results a = arr (not . null . toList) . observe a
 
 -- | Create a filtering container arrow by mapping a predicate function over the
 -- input. When the predicate returns `True' the input will be returned in the
 -- output container, when `False' the empty container is returned.
 
-isA :: (Alternative f, ArrowF f (~>)) => (a -> Bool) -> a ~> a
+isA :: (Alternative f, ArrowF f ar) => (a -> Bool) -> a `ar` a
 isA f = embed . arr (\a -> if f a then pure a else empty)
 
 -- | Use the result of a container arrow as a conditional, like an if-then-else
@@ -113,7 +113,7 @@ isA f = embed . arr (\a -> if f a then pure a else empty)
 -- used, when the first arrow produces no results the /else/ arrow will be
 -- used.
 
-ifA :: (Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> t) -> (a ~> t) -> a ~> t
+ifA :: (Foldable f, ArrowF f ar, ArrowChoice ar) => (a `ar` b) -> (a `ar` t) -> (a `ar` t) -> a `ar` t
 ifA c t e = proc i -> do x <- results c -< i; if x then t -< i else e -< i
 
 -- | Apply a container arrow only when a conditional arrow produces any
@@ -123,7 +123,7 @@ ifA c t e = proc i -> do x <- results c -< i; if x then t -< i else e -< i
 
 infix 7 `when`
 
-when :: (Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> a) -> (a ~> c) -> a ~> a
+when :: (Foldable f, ArrowF f ar, ArrowChoice ar) => (a `ar` a) -> (a `ar` c) -> a `ar` a
 when a c = ifA c a id
 
 -- | Apply a container arrow only when a conditional arrow produces any
@@ -133,19 +133,19 @@ when a c = ifA c a id
 
 infix 8 `guards`
 
-guards :: (Alternative f, Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> (a ~> b) -> (a ~> b)
+guards :: (Alternative f, Foldable f, ArrowF f ar, ArrowChoice ar) => (a `ar` c) -> (a `ar` b) -> (a `ar` b)
 guards c a = ifA c a none
 
 -- | Filter the results of an arrow with a predicate arrow, when the filter
 -- condition produces results the input is accepted otherwise it is excluded.
 
-filterA :: (Alternative f, Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> a ~> a
+filterA :: (Alternative f, Foldable f, ArrowF f ar, ArrowChoice ar) => (a `ar` c) -> a `ar` a
 filterA c = ifA c id none
 
 -- | Negation container arrow. Only accept the input when the condition
 -- produces no output.
 
-notA :: (Alternative f, Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> c) -> a ~> a
+notA :: (Alternative f, Foldable f, ArrowF f ar, ArrowChoice ar) => (a `ar` c) -> a `ar` a
 notA c = ifA c none id
 
 -- | Apply the input arrow, when the arrow does not produces any results the
@@ -154,20 +154,20 @@ notA c = ifA c none id
 
 infix 6 `orElse`
 
-orElse :: (Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> (a ~> b) -> a ~> b
+orElse :: (Foldable f, ArrowF f ar, ArrowChoice ar) => (a `ar` b) -> (a `ar` b) -> a `ar` b
 orElse a = ifA a a 
 
 -- | Map a `Maybe' input to a container output. When the Maybe is a `Nothing'
 -- an empty container will be returned, `Just' will result in a singleton
 -- container.
 
-maybeA :: (Alternative f, ArrowF f (~>)) => Maybe a ~> a
+maybeA :: (Alternative f, ArrowF f ar) => Maybe a `ar` a
 maybeA = embed . arr (maybe empty pure)
 
 -- | Apply a container arrow, when there are no results a `Nothing' will be
 -- returned, otherwise the results will be wrapped in a `Just'. This function
 -- always produces result.
 
-optional :: (Foldable f, ArrowF f (~>), ArrowChoice (~>)) => (a ~> b) -> a ~> Maybe b
+optional :: (Foldable f, ArrowF f ar, ArrowChoice ar) => (a `ar` b) -> a `ar` Maybe b
 optional a = ifA a (arr Just . a) (arr (const Nothing))
 
