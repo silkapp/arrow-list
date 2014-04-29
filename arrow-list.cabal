@@ -1,39 +1,37 @@
-Name:             arrow-list
-Version:          0.6.1.3
-Synopsis:         List arrows for Haskell.
-Description:
+name:                arrow-list
+version:             0.6.1.3
+synopsis:            List arrows for Haskell.
+description:
   This small Haskell library provides some type class, types and functions to
   work with list (and list-like) arrows. List arrows represent computations
   that may return multiple outputs. Making functions that return lists an
   instance of both the `Category` and `Arrow` type class allow you to easily
   compose multiple computations into one with standard building blocks.
+author:              Sebastiaan Visser
+maintainer:          code@silk.co
+category:            Control
+license:             BSD3
+homepage:            https://github.com/silkapp/arrow-list
+bug-reports:         https://github.com/silkapp/arrow-list/issues
+license-file:        LICENSE
+build-type:          Simple
+cabal-version:       >= 1.6
 
-Category:         Control
-License:          BSD3
-License-file:     LICENSE
-Build-Type:       Simple
-Cabal-Version:    >= 1.6
+source-repository head
+  type:     git
+  location: git://github.com/silkapp/arrow-list.git
 
-Author:        Sebastiaan Visser
-Maintainer:    Sebastiaan Visser <code@fvisser.nl>
-Homepage:      https://github.com/sebastiaanvisser/arrow-list
-Bug-Reports:   http://github.com/sebastiaanvisser/arrow-list/issues
-
-Source-Repository head
-  Type:     git
-  Location: git://github.com/sebastiaanvisser/arrow-list.git
-
-Library
-  GHC-Options:      -Wall
-  HS-Source-Dirs:   src
-
-  Build-Depends:    base ==4.*
-                  , mtl >= 1.1 && < 2.2
-                  , containers >= 0.3 && < 0.6
-
-  Exposed-modules:  Control.Arrow.ArrowF
-                    Control.Arrow.ArrowKleisli
-                    Control.Arrow.ArrowList
-                    Control.Arrow.List
-                    Control.Arrow.Sequence
-                    Control.Monad.Sequence
+library
+  ghc-options:       -Wall
+  hs-source-dirs:    src
+  exposed-modules:
+    Control.Arrow.ArrowF
+    Control.Arrow.ArrowKleisli
+    Control.Arrow.ArrowList
+    Control.Arrow.List
+    Control.Arrow.Sequence
+    Control.Monad.Sequence
+  build-depends:
+      base ==4.*
+    , containers >= 0.3 && < 0.6
+    , mtl >= 1.1 && < 2.2
