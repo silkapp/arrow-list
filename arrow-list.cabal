@@ -1,5 +1,5 @@
 name:                arrow-list
-version:             0.6.1.3
+version:             0.6.1.4
 synopsis:            List arrows for Haskell.
 description:
   This small Haskell library provides some type class, types and functions to
