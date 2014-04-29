@@ -1,5 +1,5 @@
-List arrows for Haskell.
-========================
+# List arrows for Haskell.
+[![Build Status](https://travis-ci.org/silkapp/arrow-list.svg?branch=master)](https://travis-ci.org/silkapp/arrow-list)
 
 This small Haskell library provides some type classes, types and functions to
 work with list arrows and the more generalized container arrows. List arrows
@@ -26,4 +26,3 @@ This package provides:
 
   - A type class `ArrowF` for embedding functions that produce a some
     Foldable + Alternative functor of outputs into _some_ container arrow.
-
