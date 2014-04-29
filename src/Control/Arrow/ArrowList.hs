@@ -40,9 +40,9 @@ import Control.Arrow
 import Prelude hiding ((.), id)
 
 -- | The `ArrowList' class represents two possible actions:
--- 
+--
 --   1. Lifting functions from one value to a list of values into a list arrow.
--- 
+--
 --   2. Mapping a function over the result list of a list arrow.
 
 class Arrow arr => ArrowList arr where
@@ -144,7 +144,7 @@ notA c = ifA c none id
 infix 8 `orElse`
 
 orElse :: (ArrowList arr, ArrowChoice arr) => (a `arr` b) -> (a `arr` b) -> a `arr` b
-orElse a = ifA a a 
+orElse a = ifA a a
 
 -- | Map a `Maybe' input to a list output. When the Maybe is a `Nothing' an
 -- empty list will be returned, `Just' will result in a singleton list.
@@ -158,4 +158,3 @@ maybeL = arrL (maybe [] return)
 
 optional :: (ArrowChoice arr, ArrowList arr) => (a `arr` b) -> a `arr` Maybe b
 optional a = ifA a (arr Just . a) (arr (const Nothing))
-

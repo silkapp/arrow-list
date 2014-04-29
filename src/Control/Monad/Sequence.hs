@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# OPTIONS -fno-warn-orphans #-}
 {-# LANGUAGE CPP #-}
 module Control.Monad.Sequence
@@ -64,4 +65,3 @@ instance MonadTrans SeqT where
 
 instance MonadIO m => MonadIO (SeqT m) where
   liftIO = lift . liftIO
-

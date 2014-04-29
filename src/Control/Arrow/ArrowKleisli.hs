@@ -29,4 +29,3 @@ effect a = arrM (\b -> a >> return b)
 
 arrIO :: (MonadIO m, ArrowKleisli m arr) => (a -> IO b) -> a `arr` b
 arrIO f = arrM (liftIO . f)
-

@@ -155,7 +155,7 @@ notA c = ifA c none id
 infix 6 `orElse`
 
 orElse :: (Foldable f, ArrowF f arr, ArrowChoice arr) => (a `arr` b) -> (a `arr` b) -> a `arr` b
-orElse a = ifA a a 
+orElse a = ifA a a
 
 -- | Map a `Maybe' input to a container output. When the Maybe is a `Nothing'
 -- an empty container will be returned, `Just' will result in a singleton
@@ -170,4 +170,3 @@ maybeA = embed . arr (maybe empty pure)
 
 optional :: (Foldable f, ArrowF f arr, ArrowChoice arr) => (a `arr` b) -> a `arr` Maybe b
 optional a = ifA a (arr Just . a) (arr (const Nothing))
-

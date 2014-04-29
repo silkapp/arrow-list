@@ -54,4 +54,3 @@ instance Monad m => ArrowF [] (ListTArrow m) where
 
 arrML :: (ArrowList arr, ArrowKleisli m arr) => (a -> m [b]) -> a `arr` b
 arrML x = unlist . arrM x
-
