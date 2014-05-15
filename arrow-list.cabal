@@ -18,12 +18,13 @@ build-type:          Simple
 cabal-version:       >= 1.6
 
 extra-source-files:
-  README.md
   CHANGELOG.md
+  LICENSE
+  README.md
 
 source-repository head
-  type:     git
-  location: git://github.com/silkapp/arrow-list.git
+  type:              git
+  location:          https://github.com/silkapp/arrow-list.git
 
 library
   ghc-options:       -Wall

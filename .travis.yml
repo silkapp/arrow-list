@@ -7,5 +7,5 @@ script:
 notifications:
   email:
     recipients: travis@silk.co
-    on_success: change
+    on_success: never
     on_failure: change
