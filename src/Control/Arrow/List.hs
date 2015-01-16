@@ -1,20 +1,20 @@
 {-# LANGUAGE
-    GeneralizedNewtypeDeriving
-  , TypeOperators
-  , FlexibleInstances
+    FlexibleInstances
+  , GeneralizedNewtypeDeriving
   , MultiParamTypeClasses
   , StandaloneDeriving
+  , TypeOperators
   #-}
 module Control.Arrow.List where
 
-import Prelude hiding ((.), id)
 import Control.Arrow
-import Control.Arrow.ArrowKleisli
-import Control.Arrow.ArrowList
-import Control.Arrow.ArrowF
+import Control.Arrow.Kleisli.Class
+import Control.Arrow.List.Class
+import Control.Arrow.ListLike.Class
 import Control.Category
 import Control.Monad.Identity
 import Control.Monad.List
+import Prelude hiding (id, (.))
 
 -- * ListT arrow.
 
@@ -45,7 +45,7 @@ instance Monad m => ArrowList (ListTArrow m) where
   arrL a   = ListTArrow (Kleisli (ListT . return . a))
   mapL f g = arrML (liftM f . runListTArrow g)
 
-instance Monad m => ArrowF [] (ListTArrow m) where
+instance Monad m => ArrowListLike [] (ListTArrow m) where
   embed     = ListTArrow (Kleisli (ListT . return))
   observe f = ListTArrow . Kleisli $ \a -> ListT $
                 return `liftM` runListT (runKleisli (runListTArrow' f) a)

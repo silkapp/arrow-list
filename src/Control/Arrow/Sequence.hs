@@ -1,20 +1,20 @@
 {-# LANGUAGE
-    GeneralizedNewtypeDeriving
-  , TypeOperators
-  , FlexibleInstances
+    FlexibleInstances
+  , GeneralizedNewtypeDeriving
   , MultiParamTypeClasses
   , StandaloneDeriving
+  , TypeOperators
   #-}
 module Control.Arrow.Sequence where
 
 import Control.Arrow
-import Control.Arrow.ArrowF
-import Control.Arrow.ArrowKleisli
+import Control.Arrow.Kleisli.Class
+import Control.Arrow.ListLike.Class
 import Control.Category
 import Control.Monad.Identity
 import Control.Monad.Sequence
 import Data.Sequence
-import Prelude hiding ((.), id, const)
+import Prelude hiding (const, id, (.))
 
 -- * SeqT arrow.
 
@@ -41,7 +41,7 @@ type SeqArrow a b = SeqTArrow Identity a b
 runSeqArrow :: SeqArrow a b -> a -> Seq b
 runSeqArrow a = runIdentity . runSeqTArrow a
 
-instance Monad m => ArrowF Seq (SeqTArrow m) where
+instance Monad m => ArrowListLike Seq (SeqTArrow m) where
   embed     = SeqTArrow (Kleisli (SeqT . return))
   observe f = SeqTArrow . Kleisli $ \a -> SeqT $
                 singleton `liftM` runSeqT (runKleisli (runSeqTArrow' f) a)

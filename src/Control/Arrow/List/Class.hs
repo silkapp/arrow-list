@@ -1,10 +1,13 @@
-{-# LANGUAGE TypeOperators, Arrows #-}
+{-# LANGUAGE
+    Arrows
+  , TypeOperators
+  #-}
 {- |
 The `ArrowList' type class, and a collection of list arrow related functions.
 This typeclass can be used to embed functions producing multiple outputs into a
 an arrow.
 -}
-module Control.Arrow.ArrowList
+module Control.Arrow.List.Class
 (
   -- * ArrowList type class.
   ArrowList (..)
@@ -34,10 +37,10 @@ module Control.Arrow.ArrowList
 )
 where
 
-import Control.Monad hiding (when)
-import Control.Category
 import Control.Arrow
-import Prelude hiding ((.), id)
+import Control.Category
+import Control.Monad hiding (when)
+import Prelude hiding (id, (.))
 
 -- | The `ArrowList' class represents two possible actions:
 --

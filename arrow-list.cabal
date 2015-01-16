@@ -30,9 +30,9 @@ library
   ghc-options:       -Wall
   hs-source-dirs:    src
   exposed-modules:
-    Control.Arrow.ArrowF
-    Control.Arrow.ArrowKleisli
-    Control.Arrow.ArrowList
+    Control.Arrow.Kleisli.Class
+    Control.Arrow.List.Class
+    Control.Arrow.ListLike.Class
     Control.Arrow.List
     Control.Arrow.Sequence
     Control.Monad.Sequence

@@ -3,17 +3,17 @@ The `ArrowKleisli' type class allows for embedding monadic operations in
 Kleisli arrows.
 -}
 {-# LANGUAGE
-    TypeOperators
-  , MultiParamTypeClasses
-  , FlexibleInstances
+    FlexibleInstances
   , FunctionalDependencies
+  , MultiParamTypeClasses
+  , TypeOperators
   #-}
-module Control.Arrow.ArrowKleisli where
+module Control.Arrow.Kleisli.Class where
 
 import Control.Arrow
 import Control.Category
 import Control.Monad.Trans
-import Prelude hiding ((.), id)
+import Prelude hiding (id, (.))
 
 class (Monad m, Arrow arr) => ArrowKleisli m arr | arr -> m where
   arrM :: (a -> m b) -> a `arr` b
