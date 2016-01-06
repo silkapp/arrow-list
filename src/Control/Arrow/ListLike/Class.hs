@@ -37,18 +37,19 @@ module Control.Arrow.ListLike.Class
 )
 where
 
+import Prelude hiding (const, id, (.))
+
 import Control.Applicative hiding (optional)
 import Control.Arrow
 import Control.Arrow.Kleisli.Class
 import Control.Category
-import Data.Foldable (Foldable, toList)
-import Prelude hiding (const, id, (.))
+import qualified Data.Foldable as F
 import qualified Prelude
 
 -- | A type class for arrows that produce containers of results. The container
 -- arrow can be seen as a generalization for list arrows. Most operations
 -- assume the container type has an 'Applicative', an 'Alternative' and a
--- 'Foldable' instance.
+-- 'F.Foldable' instance.
 
 class Arrow arr => ArrowListLike f arr | arr -> f where
   embed   :: f a `arr` a                 -- ^ Use a container as the input for an arrow.
@@ -98,8 +99,8 @@ none = constF empty
 -- | Returns a `Bool' indicating whether the input arrow produces a container
 -- with any results.
 
-results :: (Foldable f, ArrowListLike f arr) => (a `arr` b) -> (a `arr` Bool)
-results a = arr (not . null . toList) . observe a
+results :: (F.Foldable f, ArrowListLike f arr) => (a `arr` b) -> (a `arr` Bool)
+results a = arr (not . null . F.toList) . observe a
 
 -- | Create a filtering container arrow by mapping a predicate function over the
 -- input. When the predicate returns `True' the input will be returned in the
@@ -113,7 +114,7 @@ isA f = embed . arr (\a -> if f a then pure a else empty)
 -- used, when the first arrow produces no results the /else/ arrow will be
 -- used.
 
-ifA :: (Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` b) -> (a `arr` t) -> (a `arr` t) -> a `arr` t
+ifA :: (F.Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` b) -> (a `arr` t) -> (a `arr` t) -> a `arr` t
 ifA c t e = proc i -> do x <- results c -< i; if x then t -< i else e -< i
 
 -- | Apply a container arrow only when a conditional arrow produces any
@@ -123,7 +124,7 @@ ifA c t e = proc i -> do x <- results c -< i; if x then t -< i else e -< i
 
 infix 7 `when`
 
-when :: (Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` a) -> (a `arr` c) -> a `arr` a
+when :: (F.Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` a) -> (a `arr` c) -> a `arr` a
 when a c = ifA c a id
 
 -- | Apply a container arrow only when a conditional arrow produces any
@@ -133,19 +134,19 @@ when a c = ifA c a id
 
 infix 8 `guards`
 
-guards :: (Alternative f, Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` c) -> (a `arr` b) -> (a `arr` b)
+guards :: (Alternative f, F.Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` c) -> (a `arr` b) -> (a `arr` b)
 guards c a = ifA c a none
 
 -- | Filter the results of an arrow with a predicate arrow, when the filter
 -- condition produces results the input is accepted otherwise it is excluded.
 
-filterA :: (Alternative f, Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` c) -> a `arr` a
+filterA :: (Alternative f, F.Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` c) -> a `arr` a
 filterA c = ifA c id none
 
 -- | Negation container arrow. Only accept the input when the condition
 -- produces no output.
 
-notA :: (Alternative f, Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` c) -> a `arr` a
+notA :: (Alternative f, F.Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` c) -> a `arr` a
 notA c = ifA c none id
 
 -- | Apply the input arrow, when the arrow does not produces any results the
@@ -154,7 +155,7 @@ notA c = ifA c none id
 
 infix 6 `orElse`
 
-orElse :: (Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` b) -> (a `arr` b) -> a `arr` b
+orElse :: (F.Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` b) -> (a `arr` b) -> a `arr` b
 orElse a = ifA a a
 
 -- | Map a `Maybe' input to a container output. When the Maybe is a `Nothing'
@@ -168,5 +169,5 @@ maybeA = embed . arr (maybe empty pure)
 -- returned, otherwise the results will be wrapped in a `Just'. This function
 -- always produces result.
 
-optional :: (Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` b) -> a `arr` Maybe b
+optional :: (F.Foldable f, ArrowListLike f arr, ArrowChoice arr) => (a `arr` b) -> a `arr` Maybe b
 optional a = ifA a (arr Just . a) (arr (const Nothing))
