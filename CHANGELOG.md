@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.7.1
+
+* Fix compilation with GHC 8.8.
+
 ## 0.7
 
 * Renamed modules to not clash with hxt
