@@ -15,7 +15,7 @@ homepage:            https://github.com/silkapp/arrow-list
 bug-reports:         https://github.com/silkapp/arrow-list/issues
 license-file:        LICENSE
 build-type:          Simple
-cabal-version:       >= 1.6
+cabal-version:       >= 1.10
 
 extra-source-files:
   CHANGELOG.md
@@ -41,3 +41,4 @@ library
     , containers >= 0.3 && < 0.7
     , fail == 4.9.*
     , mtl >= 1.1 && < 2.3
+  default-language: Haskell2010
