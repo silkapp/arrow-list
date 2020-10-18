@@ -38,5 +38,6 @@ library
     Control.Monad.Sequence
   build-depends:
       base ==4.*
-    , containers >= 0.3 && < 0.6
+    , containers >= 0.3 && < 0.7
+    , fail == 4.9.*
     , mtl >= 1.1 && < 2.3

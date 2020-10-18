@@ -10,6 +10,9 @@ where
 
 import Control.Applicative
 import Control.Monad hiding (mapM, msum)
+#if !MIN_VERSION_base(4,13,0)
+import Control.Monad.Fail
+#endif
 import Control.Monad.Trans
 import Data.Foldable
 import Data.Monoid
@@ -54,6 +57,11 @@ instance Monad m => Monad (SeqT m) where
     do a <- runSeqT m
        b <- mapM (runSeqT . k) a
        return (msum b)
+  #if !MIN_VERSION_base(4,13,0)
+  fail _ = SeqT (return mempty)
+  #endif
+
+instance Monad m => MonadFail (SeqT m) where
   fail _ = SeqT (return mempty)
 
 instance Monad m => MonadPlus (SeqT m) where
