@@ -57,9 +57,9 @@ instance Monad m => Monad (SeqT m) where
     do a <- runSeqT m
        b <- mapM (runSeqT . k) a
        return (msum b)
-  #if !MIN_VERSION_base(4,13,0)
+#if !MIN_VERSION_base(4,13,0)
   fail _ = SeqT (return mempty)
-  #endif
+#endif
 
 instance Monad m => MonadFail (SeqT m) where
   fail _ = SeqT (return mempty)
